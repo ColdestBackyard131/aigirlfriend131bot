@@ -99,8 +99,11 @@ async def broadcast(update: Update, context):
     await update.message.reply_text("✅ Broadcast sent.")
 
 
+from telegram.request import HTTPXRequest
+
 def main():
-    app = Application.builder().token(TELEGRAM_TOKEN).build()
+    request = HTTPXRequest(connect_timeout=30, read_timeout=30)
+    app = Application.builder().token(TELEGRAM_TOKEN).request(request).build()
 
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("subscribe", subscribe_command))
