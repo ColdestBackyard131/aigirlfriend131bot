@@ -15,11 +15,24 @@ def _execute(statements: list) -> list:
     return response.json()["results"]
 
 
+def _parse_value(v):
+    if not isinstance(v, dict):
+        return v
+    val = v.get("value")
+    t = v.get("type", "")
+    if t == "integer" and val is not None:
+        return int(val)
+    if t == "float" and val is not None:
+        return float(val)
+    return val
+
+
 def _q(sql: str, args: list = []) -> list:
     results = _execute([{"sql": sql, "args": [{"type": "text", "value": str(a)} for a in args]}])
-    rows = results[0].get("response", {}).get("result", {}).get("rows", [])
-    cols = [c["name"] for c in results[0].get("response", {}).get("result", {}).get("cols", [])]
-    return [dict(zip(cols, [v["value"] for v in row])) for row in rows]
+    result = results[0].get("response", {}).get("result", {})
+    rows = result.get("rows", [])
+    cols = [c["name"] for c in result.get("cols", [])]
+    return [dict(zip(cols, [_parse_value(v) for v in row])) for row in rows]
 
 
 def _run(sql: str, args: list = []):

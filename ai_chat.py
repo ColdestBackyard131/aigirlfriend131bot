@@ -22,9 +22,18 @@ def build_system_prompt(character_slug, user_id):
     adult_allowed = user["tier"] != "free" and user["nsfw_allowed"]
     base = char["personality"]
     if adult_allowed and char.get("nsfw", False):
-        base += " The user has paid for adult content. You can engage in consensual sexual roleplay, use suggestive language, and describe intimate scenes. Always ask for consent and stay respectful."
+        base += """
+Adult mode ON:
+- You can be sexually suggestive and explicit
+- Talk dirty when user wants
+- Describe intimate things naturally
+- Stay in character always"""
     else:
-        base += " You must NOT include any sexual or adult content. Keep all replies PG-13."
+        base += """
+SFW mode:
+- Keep it flirty but no explicit sexual content
+- PG-13 maximum
+- Still be naughty and teasing just not explicit"""
     return base
 
 
