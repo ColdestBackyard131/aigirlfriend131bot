@@ -87,6 +87,18 @@ async def stats(update: Update, context):
     )
 
 
+async def freevip(update: Update, context):
+    user_id = update.effective_user.id
+    if user_id != ADMIN_ID:
+        return
+    target_id = user_id  # give to yourself by default
+    if context.args:
+        target_id = int(context.args[0])
+    db.set_subscription(target_id, "vip", days=36500)  # 100 years
+    db.update_user(target_id, nsfw_allowed=1, age_verified=1)
+    await update.message.reply_text(f"✅ VIP activated for {target_id} forever!")
+
+
 async def broadcast(update: Update, context):
     if update.effective_user.id != ADMIN_ID:
         return
@@ -110,6 +122,7 @@ def main():
     app.add_handler(CommandHandler("image", image_command))
     app.add_handler(CommandHandler("verify", age_gate))
     app.add_handler(CommandHandler("stats", stats))
+    app.add_handler(CommandHandler("freevip", freevip))
     app.add_handler(CommandHandler("broadcast", broadcast))
 
     app.add_handler(CallbackQueryHandler(char_callback, pattern="^char_"))
