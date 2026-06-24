@@ -3,13 +3,17 @@ name: Run Telegram Bot
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 * * * *'   # runs at :00 every hour
-    - cron: '30 * * * *'  # runs at :30 every hour
+    - cron: '0 * * * *'   # Job 1 - starts at :00 every hour
+    - cron: '30 * * * *'  # Job 2 - starts at :30 every hour
+
+concurrency:
+  group: telegram-bot-${{ github.run_id }}
+  cancel-in-progress: false
 
 jobs:
   run-bot:
     runs-on: ubuntu-latest
-    timeout-minutes: 28
+    timeout-minutes: 58
 
     steps:
       - uses: actions/checkout@v3
