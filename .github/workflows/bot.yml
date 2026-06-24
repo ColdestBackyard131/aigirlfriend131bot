@@ -3,12 +3,11 @@ name: Run Telegram Bot
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 * * * *'   # Job 1 - starts at :00 every hour
-    - cron: '30 * * * *'  # Job 2 - starts at :30 every hour
+    - cron: '0 * * * *'   # runs every hour at :00
 
 concurrency:
-  group: telegram-bot-${{ github.run_id }}
-  cancel-in-progress: false
+  group: telegram-bot
+  cancel-in-progress: true
 
 jobs:
   run-bot:
