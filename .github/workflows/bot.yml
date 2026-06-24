@@ -3,12 +3,13 @@ name: Run Telegram Bot
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 * * * *'  # every hour
+    - cron: '0 * * * *'   # runs at :00 every hour
+    - cron: '30 * * * *'  # runs at :30 every hour
 
 jobs:
   run-bot:
     runs-on: ubuntu-latest
-    timeout-minutes: 58
+    timeout-minutes: 28
 
     steps:
       - uses: actions/checkout@v3
