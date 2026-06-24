@@ -127,6 +127,14 @@ def save_conversation(user_id: int, character: str, user_message: str, bot_reply
     )
 
 
+def seed_greeting(user_id: int, character: str, greeting: str):
+    history = [{"role": "assistant", "content": greeting}]
+    _run(
+        "INSERT OR IGNORE INTO conversations (user_id, character, history) VALUES (?, ?, ?)",
+        [user_id, character, json.dumps(history)]
+    )
+
+
 def count_conversations() -> int:
     return int(_q("SELECT COUNT(*) as c FROM conversations")[0]["c"])
 
