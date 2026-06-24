@@ -3,12 +3,12 @@ name: Run Telegram Bot
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 * * * *'    # starts at :00 every hour
-    - cron: '55 * * * *'   # starts at :55 — 1 min before previous exits at :55
+    - cron: '0 * * * *'
+    - cron: '55 * * * *'
 
 concurrency:
   group: telegram-bot
-  cancel-in-progress: false  # new job queues, old job exits at 55min, new takes over
+  cancel-in-progress: false
 
 jobs:
   run-bot:
@@ -34,4 +34,6 @@ jobs:
           ADMIN_ID: ${{ secrets.ADMIN_ID }}
           TURSO_URL: ${{ secrets.TURSO_URL }}
           TURSO_TOKEN: ${{ secrets.TURSO_TOKEN }}
-        run: python bot.py 2>&1; echo "Exit code: $?"
+        run: |
+          python bot.py
+          echo "Exit code: $?"
