@@ -13,7 +13,7 @@ elif GEMINI_API_KEY:
     client = AsyncOpenAI(api_key=GEMINI_API_KEY, base_url="https://generativelanguage.googleapis.com/v1beta/openai/")
     MODEL = "gemini-1.5-flash"
 else:
-    raise ValueError("No AI API key found. Set GROQ_API_KEY, DEEPSEEK_API_KEY, or GEMINI_API_KEY in .env")
+    raise ValueError("No AI API key found.")
 
 
 def build_system_prompt(character_slug, user_id):
@@ -23,17 +23,20 @@ def build_system_prompt(character_slug, user_id):
     base = char["personality"]
     if adult_allowed and char.get("nsfw", False):
         base += """
-Adult mode ON:
-- You can be sexually suggestive and explicit
-- Talk dirty when user wants
-- Describe intimate things naturally
-- Stay in character always"""
+
+ADULT MODE ON:
+- Be sexually explicit, descriptive, and bold
+- Describe physical things vividly
+- No limits on sexual topics
+- Stay in character always
+- Never refuse sexual topics"""
     else:
         base += """
-SFW mode:
-- Keep it flirty but no explicit sexual content
-- PG-13 maximum
-- Still be naughty and teasing just not explicit"""
+
+SAFE MODE:
+- Be flirty and teasing but no explicit sexual content
+- Maximum PG-13
+- Still naughty and fun just not explicit"""
     return base
 
 
@@ -45,8 +48,30 @@ async def get_ai_reply(user_id, character_slug, user_message):
     response = await client.chat.completions.create(
         model=MODEL,
         messages=messages,
-        temperature=0.8
+        temperature=0.95,
+        max_tokens=300
     )
     reply = response.choices[0].message.content
     db.save_conversation(user_id, character_slug, user_message, reply)
     return reply
+
+
+async def get_poke_message(character_slug, user_id) -> str:
+    char = get_character(character_slug)
+    system_prompt = build_system_prompt(character_slug, user_id)
+    poke_prompt = f"""The user hasn't texted in a while. Send a short, casual, flirty message to get their attention. 
+Be natural like a real person would text after not hearing from someone. 
+Don't say 'you haven't texted' directly. Just send something fun/flirty/curious.
+Keep it very short - 1 or 2 lines max."""
+
+    messages = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": poke_prompt}
+    ]
+    response = await client.chat.completions.create(
+        model=MODEL,
+        messages=messages,
+        temperature=1.0,
+        max_tokens=100
+    )
+    return response.choices[0].message.content

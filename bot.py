@@ -1,18 +1,24 @@
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     Application, CommandHandler, CallbackQueryHandler,
-    MessageHandler, PreCheckoutQueryHandler, filters
+    MessageHandler, PreCheckoutQueryHandler, filters,
+    JobQueue
 )
+from telegram.request import HTTPXRequest
 from dotenv import load_dotenv
 load_dotenv()
 
+import time
 from config import TELEGRAM_TOKEN, ADMIN_ID
 from characters import get_character, get_all_characters
 import database as db
 import ai_chat
 import image_gen
 from payments import subscribe_command, buy_callback, pre_checkout, successful_payment
-from utils import age_gate, age_confirm_callback, is_age_verified
+from utils import age_gate, age_confirm_callback
+
+# track last message time per user
+last_message_time = {}
 
 
 async def start(update: Update, context):
@@ -22,7 +28,7 @@ async def start(update: Update, context):
         [InlineKeyboardButton(c["name"], callback_data=f"char_{slug}")]
         for slug, c in get_all_characters().items()
     ]
-    await update.message.reply_text("👋 Welcome! Choose a character:", reply_markup=InlineKeyboardMarkup(keyboard))
+    await update.message.reply_text("👋 Choose your character:", reply_markup=InlineKeyboardMarkup(keyboard))
 
 
 async def char_callback(update: Update, context):
@@ -40,6 +46,8 @@ async def handle_message(update: Update, context):
     if not user:
         await update.message.reply_text("Please use /start first.")
         return
+
+    last_message_time[user_id] = time.time()
 
     if user["tier"] == "free":
         if user["msg_credits"] <= 0:
@@ -91,10 +99,10 @@ async def freevip(update: Update, context):
     user_id = update.effective_user.id
     if user_id != ADMIN_ID:
         return
-    target_id = user_id  # give to yourself by default
+    target_id = user_id
     if context.args:
         target_id = int(context.args[0])
-    db.set_subscription(target_id, "vip", days=36500)  # 100 years
+    db.set_subscription(target_id, "vip", days=36500)
     db.update_user(target_id, nsfw_allowed=1, age_verified=1)
     await update.message.reply_text(f"✅ VIP activated for {target_id} forever!")
 
@@ -111,7 +119,23 @@ async def broadcast(update: Update, context):
     await update.message.reply_text("✅ Broadcast sent.")
 
 
-from telegram.request import HTTPXRequest
+async def poke_inactive_users(context):
+    now = time.time()
+    for user in db.get_all_users():
+        user_id = int(user["user_id"])
+        active_char = user.get("active_char")
+        if not active_char:
+            continue
+        last_time = last_message_time.get(user_id, 0)
+        # poke if inactive for 1-2 hours (randomly pick users)
+        if last_time > 0 and (now - last_time) > 3600:
+            try:
+                poke_msg = await ai_chat.get_poke_message(active_char, user_id)
+                await context.bot.send_message(user_id, poke_msg)
+                last_message_time[user_id] = now  # reset so it doesn't spam
+            except:
+                pass
+
 
 def main():
     request = HTTPXRequest(connect_timeout=30, read_timeout=30)
@@ -132,6 +156,9 @@ def main():
     app.add_handler(PreCheckoutQueryHandler(pre_checkout))
     app.add_handler(MessageHandler(filters.SUCCESSFUL_PAYMENT, successful_payment))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+
+    # auto poke inactive users every 30 minutes
+    app.job_queue.run_repeating(poke_inactive_users, interval=1800, first=1800)
 
     app.run_polling()
 
