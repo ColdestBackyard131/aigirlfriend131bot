@@ -3,12 +3,12 @@ name: Run Telegram Bot
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 * * * *'    # runs at :00 every hour
-    - cron: '30 * * * *'   # runs at :30 every hour
+    - cron: '0 * * * *'    # starts at :00 every hour
+    - cron: '55 * * * *'   # starts at :55 — 1 min before previous exits at :55
 
 concurrency:
   group: telegram-bot
-  cancel-in-progress: false  # new job waits, old job exits cleanly at 57min
+  cancel-in-progress: false  # new job queues, old job exits at 55min, new takes over
 
 jobs:
   run-bot:

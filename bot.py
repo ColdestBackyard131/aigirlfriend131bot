@@ -274,6 +274,10 @@ async def poke_inactive_users(context):
 
 
 def main():
+    import threading, os, signal
+    # auto-exit after 55 min so the next queued workflow takes over with no gap
+    threading.Timer(55 * 60, lambda: os.kill(os.getpid(), signal.SIGTERM)).start()
+
     request = HTTPXRequest(connect_timeout=30, read_timeout=30)
     app = Application.builder().token(TELEGRAM_TOKEN).request(request).build()
 
