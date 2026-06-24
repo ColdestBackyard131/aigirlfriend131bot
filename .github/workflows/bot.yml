@@ -34,4 +34,4 @@ jobs:
           ADMIN_ID: ${{ secrets.ADMIN_ID }}
           TURSO_URL: ${{ secrets.TURSO_URL }}
           TURSO_TOKEN: ${{ secrets.TURSO_TOKEN }}
-        run: python bot.py || true
+        run: python bot.py 2>&1; echo "Exit code: $?"
