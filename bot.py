@@ -7,8 +7,14 @@ from telegram.request import HTTPXRequest
 from dotenv import load_dotenv
 load_dotenv()
 
+import logging
 import time
 import random
+
+logging.basicConfig(
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    level=logging.INFO
+)
 from config import TELEGRAM_TOKEN, ADMIN_ID
 from characters import get_character, get_all_characters
 import database as db
@@ -126,6 +132,7 @@ async def char_callback(update: Update, context):
 
 async def handle_message(update: Update, context):
     user_id = update.effective_user.id
+    logging.info(f"Message from {user_id}: {update.message.text[:30]}")
     user = db.get_user(user_id)
     if not user:
         await update.message.reply_text("Use /start first.")
@@ -158,8 +165,13 @@ async def handle_message(update: Update, context):
     # show typing indicator while AI is thinking
     await context.bot.send_chat_action(chat_id=user_id, action="typing")
 
-    reply, is_photo_req = await ai_chat.get_ai_reply(user_id, active_char, update.message.text)
-    await update.message.reply_text(reply)
+    try:
+        reply, is_photo_req = await ai_chat.get_ai_reply(user_id, active_char, update.message.text)
+        await update.message.reply_text(reply)
+    except Exception as e:
+        print(f"[ERROR] AI reply failed for user {user_id}: {e}")
+        await update.message.reply_text("Oops, kuch gadbad ho gayi 😅 thodi der baad try karo!")
+        return
 
     if is_photo_req:
         is_paid = user["tier"] != "free"
