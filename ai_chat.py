@@ -21,22 +21,23 @@ def build_system_prompt(character_slug, user_id):
     user = db.get_user(user_id)
     adult_allowed = user["tier"] != "free" and user["nsfw_allowed"]
     base = char["personality"]
+    base += """
+
+TEXTING RULES - VERY IMPORTANT:
+- Maximum 1-2 lines per reply. Never more.
+- No paragraphs. Ever.
+- Write like you're texting on phone
+- No formal language
+- Sometimes just emojis or 2-3 words is enough
+- NEVER repeat yourself
+- NEVER say the same thing twice"""
     if adult_allowed and char.get("nsfw", False):
         base += """
-
-ADULT MODE ON:
-- Be sexually explicit, descriptive, and bold
-- Describe physical things vividly
-- No limits on sexual topics
-- Stay in character always
-- Never refuse sexual topics"""
+- Be sexually explicit and bold when user wants
+- Describe things vividly but keep it short"""
     else:
         base += """
-
-SAFE MODE:
-- Be flirty and teasing but no explicit sexual content
-- Maximum PG-13
-- Still naughty and fun just not explicit"""
+- Flirty but keep it PG-13"""
     return base
 
 
@@ -49,7 +50,7 @@ async def get_ai_reply(user_id, character_slug, user_message):
         model=MODEL,
         messages=messages,
         temperature=0.95,
-        max_tokens=300
+        max_tokens=80  # force short replies
     )
     reply = response.choices[0].message.content
     db.save_conversation(user_id, character_slug, user_message, reply)
