@@ -19,45 +19,57 @@ else:
 PHOTO_REQUEST_KEYWORDS = [
     "photo", "pic", "picture", "selfie", "send", "dikha", "dikhao",
     "dekh", "foto", "image", "boobs", "nude", "naked", "nangi",
-    "lingerie", "bikini", "nudes", "body", "badan"
+    "lingerie", "bikini", "nudes", "body", "badan", "dikhao"
 ]
 
 
 def is_photo_request(text: str) -> bool:
-    text_lower = text.lower()
-    return any(kw in text_lower for kw in PHOTO_REQUEST_KEYWORDS)
+    return any(kw in text.lower() for kw in PHOTO_REQUEST_KEYWORDS)
 
 
 def build_system_prompt(character_slug, user_id):
     char = get_character(character_slug)
     user = db.get_user(user_id)
     adult_allowed = user["tier"] != "free" and int(user.get("nsfw_allowed", 0)) == 1
+
     base = char["personality"]
+
+    base += """
+
+ADDITIONAL RULES:
+- You are FEMALE. Use only feminine Hindi words for yourself: main, mujhe, meri, hoon.
+- NEVER use: mein (male form), mera (for self incorrectly)
+- Each reply must be DIFFERENT from previous replies. No repetition.
+- Read user's last message carefully and respond to EXACTLY what they said.
+- Keep replies short — 1 to 2 lines maximum."""
+
     if adult_allowed and char.get("nsfw", False):
-        base += "\nADULT MODE ON: Be fully explicit, descriptive, no restrictions at all."
-        base += "\nWhen user asks for photo say something like 'lo jaan...' or 'sirf tumhare liye 😈' then photo will be sent automatically."
+        base += """
+- ADULT MODE: Be sexually explicit and descriptive when user wants.
+- When asked for photo say something flirty like "lo jaan 😈" or "sirf tumhare liye 💋" — photo will be sent automatically."""
     else:
-        base += "\nSAFE MODE: Tease but never explicit. Keep them wanting more."
-        base += "\nWhen user asks for photo, tease them like a real girl would. Be coy, make them work for it. Say things like 'itni jaldi? 😏' or 'pehle thoda baat karo 😈' naturally."
+        base += """
+- SAFE MODE: Be flirty and teasing. Never explicit.
+- When asked for photo, tease them — "itni jaldi? 😏" or "pehle deserve karo 😈" — NO photo will be sent."""
+
     return base
 
 
 async def get_ai_reply(user_id, character_slug, user_message):
     system_prompt = build_system_prompt(character_slug, user_id)
     history = db.get_conversation_history(user_id, character_slug)
-    # filter out any legacy fake user messages
-    clean_history = [m for m in history if m.get("content") != "[chat started]"]
-    messages = [{"role": "system", "content": system_prompt}] + clean_history + [{"role": "user", "content": user_message}]
+    messages = [{"role": "system", "content": system_prompt}] + history + [{"role": "user", "content": user_message}]
 
     response = await client.chat.completions.create(
         model=MODEL,
         messages=messages,
-        temperature=0.9,
-        max_tokens=100
+        temperature=1.0,
+        max_tokens=100,
+        frequency_penalty=1.0,   # prevents word repetition
+        presence_penalty=0.6     # encourages new topics
     )
-    reply = response.choices[0].message.content.strip()
+    reply = response.choices[0].message.content
     db.save_conversation(user_id, character_slug, user_message, reply)
-
     return reply, is_photo_request(user_message)
 
 

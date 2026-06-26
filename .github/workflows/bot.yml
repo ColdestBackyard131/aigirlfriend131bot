@@ -3,12 +3,8 @@ name: Run Telegram Bot
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 * * * *'
-    - cron: '55 * * * *'
-
-concurrency:
-  group: telegram-bot
-  cancel-in-progress: false
+    - cron: '0 * * * *'   # starts every hour at :00
+    - cron: '57 * * * *'  # starts every hour at :57 (3 min before :00 job dies)
 
 jobs:
   run-bot:
@@ -16,10 +12,10 @@ jobs:
     timeout-minutes: 58
 
     steps:
-      - uses: actions/checkout@v4.2.2
+      - uses: actions/checkout@v3
 
       - name: Set up Python 3.11
-        uses: actions/setup-python@v5.6.0
+        uses: actions/setup-python@v4
         with:
           python-version: '3.11'
 
@@ -34,6 +30,4 @@ jobs:
           ADMIN_ID: ${{ secrets.ADMIN_ID }}
           TURSO_URL: ${{ secrets.TURSO_URL }}
           TURSO_TOKEN: ${{ secrets.TURSO_TOKEN }}
-        run: |
-          python bot.py
-          echo "Exit code: $?"
+        run: python bot.py
