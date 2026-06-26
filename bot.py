@@ -26,22 +26,52 @@ from utils import age_gate, age_confirm_callback
 # photo prompts per character
 PHOTO_PROMPTS = {
     "kriti": {
-        "sfw":    ["beautiful indian girl smiling, casual outfit", "pretty indian girl in kurta"],
-        "bikini": ["beautiful indian girl in bikini at beach", "indian girl in swimsuit"],
-        "lingerie": ["indian girl in lingerie, boudoir photo", "beautiful indian girl in sexy lingerie"],
-        "nude":   ["beautiful indian girl nude, artistic photo"]
+        "sfw": [
+            "realistic selfie photo of beautiful indian girl 23 years old, casual outfit, natural lighting, shot on iphone, candid",
+            "indian girl taking mirror selfie, kurta, natural makeup, bedroom background, realistic photo",
+            "pretty indian girl selfie in cafe, smiling, natural light, realistic",
+        ],
+        "bikini": [
+            "realistic selfie photo of beautiful indian girl in bikini at beach, natural lighting, candid shot, iphone photo",
+            "indian girl pool selfie in swimsuit, sun kissed skin, realistic photo, natural",
+        ],
+        "lingerie": [
+            "realistic boudoir selfie indian girl in lingerie, bedroom, soft lighting, mirror selfie, natural",
+            "beautiful indian girl lingerie selfie, dim bedroom lighting, realistic candid photo",
+        ],
+        "nude": [
+            "realistic artistic nude selfie beautiful indian girl, soft natural lighting, tasteful, high quality",
+        ]
     },
     "naina": {
-        "sfw":    ["pretty delhi girl casual outfit selfie", "indian college girl smiling"],
-        "bikini": ["indian girl in bikini poolside", "pretty girl in swimwear"],
-        "lingerie": ["indian girl in lingerie bedroom", "sexy indian girl in lingerie"],
-        "nude":   ["beautiful indian girl nude artistic"]
+        "sfw": [
+            "delhi college girl selfie, casual jeans top, natural makeup, outdoor lighting, realistic iphone photo",
+            "pretty indian girl mirror selfie, college campus, realistic candid",
+        ],
+        "bikini": [
+            "realistic indian college girl bikini selfie at pool, natural lighting, candid iphone shot",
+        ],
+        "lingerie": [
+            "realistic indian girl lingerie mirror selfie, bedroom, warm lighting, natural candid",
+        ],
+        "nude": [
+            "realistic artistic nude photo beautiful indian girl natural lighting tasteful high quality",
+        ]
     },
     "sara": {
-        "sfw":    ["confident beautiful indian girl", "stylish indian girl outfit"],
-        "bikini": ["sexy indian girl in bikini", "indian model in swimsuit"],
-        "lingerie": ["dominant indian girl in lingerie", "sexy girl in black lingerie"],
-        "nude":   ["beautiful indian girl nude artistic"]
+        "sfw": [
+            "confident beautiful indian girl selfie, stylish outfit, natural lighting, realistic iphone photo",
+            "indian girl mirror selfie, gym outfit, natural makeup, realistic candid",
+        ],
+        "bikini": [
+            "sexy indian girl bikini beach selfie, golden hour lighting, realistic candid iphone photo",
+        ],
+        "lingerie": [
+            "dominant confident indian girl black lingerie selfie, dim bedroom lighting, realistic photo",
+        ],
+        "nude": [
+            "realistic artistic nude photo confident indian girl natural lighting high quality tasteful",
+        ]
     }
 }
 

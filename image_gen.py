@@ -5,11 +5,15 @@ from config import STABLE_HORDE_API_KEY
 
 
 async def _pollinations(prompt, nsfw=False):
-    safe_prompt = prompt.replace(" ", "%20")
+    # add realism boosters to every prompt
+    quality_suffix = ", photorealistic, 8k, shot on iphone 15, candid, natural lighting, highly detailed"
+    full_prompt = prompt + quality_suffix
+    safe_prompt = full_prompt.replace(" ", "%20").replace(",", "%2C")
+
     if nsfw:
-        url = f"https://image.pollinations.ai/prompt/{safe_prompt}?width=512&height=512&nologo=true&enhance=true"
+        url = f"https://image.pollinations.ai/prompt/{safe_prompt}?width=768&height=1024&nologo=true&enhance=true&model=flux"
     else:
-        url = f"https://image.pollinations.ai/prompt/{safe_prompt}%20safe%20for%20work?width=512&height=512&nologo=true"
+        url = f"https://image.pollinations.ai/prompt/{safe_prompt}?width=768&height=1024&nologo=true&enhance=true&model=flux"
 
     async with aiohttp.ClientSession() as session:
         async with session.get(url, timeout=aiohttp.ClientTimeout(total=30)) as resp:

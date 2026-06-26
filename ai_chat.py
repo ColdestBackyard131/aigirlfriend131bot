@@ -1,6 +1,6 @@
 from openai import AsyncOpenAI
 from config import (DEEPSEEK_API_KEY, GROQ_API_KEY, GROQ_API_KEY_2, GROQ_API_KEY_3,
-    GROQ_API_KEY_4, GROQ_API_KEY_5, GEMINI_API_KEY,
+    GROQ_API_KEY_4, GROQ_API_KEY_5, GEMINI_API_KEY, GEMINI_API_KEY_2,
     CEREBRAS_API_KEY, CEREBRAS_API_KEY_2, CEREBRAS_API_KEY_3,
     SAMBANOVA_API_KEY, MISTRAL_API_KEY)
 from characters import get_character, POKE_MESSAGES
@@ -20,8 +20,9 @@ if SAMBANOVA_API_KEY:
     CLIENTS.append({"key": SAMBANOVA_API_KEY, "base_url": "https://api.sambanova.ai/v1", "model": "Meta-Llama-3.1-70B-Instruct"})
 if MISTRAL_API_KEY:
     CLIENTS.append({"key": MISTRAL_API_KEY, "base_url": "https://api.mistral.ai/v1", "model": "mistral-small-latest"})
-if GEMINI_API_KEY:
-    CLIENTS.append({"key": GEMINI_API_KEY, "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/", "model": "gemini-2.0-flash"})
+GEMINI_KEYS = [k for k in [GEMINI_API_KEY, GEMINI_API_KEY_2] if k]
+for key in GEMINI_KEYS:
+    CLIENTS.append({"key": key, "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/", "model": "gemini-2.0-flash"})
 if DEEPSEEK_API_KEY:
     CLIENTS.append({"key": DEEPSEEK_API_KEY, "base_url": "https://api.deepseek.com", "model": "deepseek-chat"})
 
