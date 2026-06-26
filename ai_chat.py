@@ -1,7 +1,8 @@
 from openai import AsyncOpenAI
 from config import (DEEPSEEK_API_KEY, GROQ_API_KEY, GROQ_API_KEY_2, GROQ_API_KEY_3,
     GROQ_API_KEY_4, GROQ_API_KEY_5, GEMINI_API_KEY,
-    CEREBRAS_API_KEY, SAMBANOVA_API_KEY, MISTRAL_API_KEY)
+    CEREBRAS_API_KEY, CEREBRAS_API_KEY_2, CEREBRAS_API_KEY_3,
+    SAMBANOVA_API_KEY, MISTRAL_API_KEY)
 from characters import get_character, POKE_MESSAGES
 import database as db
 import random
@@ -12,8 +13,9 @@ GROQ_KEYS = [k for k in [GROQ_API_KEY, GROQ_API_KEY_2, GROQ_API_KEY_3, GROQ_API_
 CLIENTS = []
 for key in GROQ_KEYS:
     CLIENTS.append({"key": key, "base_url": "https://api.groq.com/openai/v1", "model": "llama-3.3-70b-versatile"})
-if CEREBRAS_API_KEY:
-    CLIENTS.append({"key": CEREBRAS_API_KEY, "base_url": "https://api.cerebras.ai/v1", "model": "llama3.1-70b"})
+CEREBRAS_KEYS = [k for k in [CEREBRAS_API_KEY, CEREBRAS_API_KEY_2, CEREBRAS_API_KEY_3] if k]
+for key in CEREBRAS_KEYS:
+    CLIENTS.append({"key": key, "base_url": "https://api.cerebras.ai/v1", "model": "llama-3.3-70b"})
 if SAMBANOVA_API_KEY:
     CLIENTS.append({"key": SAMBANOVA_API_KEY, "base_url": "https://api.sambanova.ai/v1", "model": "Meta-Llama-3.1-70B-Instruct"})
 if MISTRAL_API_KEY:
