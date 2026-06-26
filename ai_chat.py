@@ -15,7 +15,7 @@ for key in GROQ_KEYS:
     CLIENTS.append({"key": key, "base_url": "https://api.groq.com/openai/v1", "model": "llama-3.3-70b-versatile"})
 CEREBRAS_KEYS = [k for k in [CEREBRAS_API_KEY, CEREBRAS_API_KEY_2, CEREBRAS_API_KEY_3] if k]
 for key in CEREBRAS_KEYS:
-    CLIENTS.append({"key": key, "base_url": "https://api.cerebras.ai/v1", "model": "llama-3.3-70b"})
+    CLIENTS.append({"key": key, "base_url": "https://api.cerebras.ai/v1", "model": "llama3.3-70b"})
 if SAMBANOVA_API_KEY:
     CLIENTS.append({"key": SAMBANOVA_API_KEY, "base_url": "https://api.sambanova.ai/v1", "model": "Meta-Llama-3.1-70B-Instruct"})
 if MISTRAL_API_KEY:
@@ -81,18 +81,26 @@ async def get_ai_reply(user_id, character_slug, user_message):
     history = db.get_conversation_history(user_id, character_slug)
     messages = [{"role": "system", "content": system_prompt}] + history + [{"role": "user", "content": user_message}]
 
-    client, MODEL = get_client()
-    response = await client.chat.completions.create(
-        model=MODEL,
-        messages=messages,
-        temperature=1.0,
-        max_tokens=100,
-        frequency_penalty=1.0,
-        presence_penalty=0.6
-    )
-    reply = response.choices[0].message.content
-    db.save_conversation(user_id, character_slug, user_message, reply)
-    return reply, is_photo_request(user_message)
+    # try each client in rotation until one works
+    for _ in range(len(CLIENTS)):
+        client, MODEL = get_client()
+        try:
+            response = await client.chat.completions.create(
+                model=MODEL,
+                messages=messages,
+                temperature=1.0,
+                max_tokens=100,
+                frequency_penalty=1.0,
+                presence_penalty=0.6
+            )
+            reply = response.choices[0].message.content
+            db.save_conversation(user_id, character_slug, user_message, reply)
+            return reply, is_photo_request(user_message)
+        except Exception as e:
+            print(f"[WARN] {MODEL} failed: {e} — trying next provider")
+            continue
+
+    raise Exception("All AI providers failed")
 
 
 async def get_poke_message(character_slug, user_id) -> str:
