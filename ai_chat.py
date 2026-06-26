@@ -1,20 +1,39 @@
 from openai import AsyncOpenAI
-from config import DEEPSEEK_API_KEY, GROQ_API_KEY, GEMINI_API_KEY
+from config import (DEEPSEEK_API_KEY, GROQ_API_KEY, GROQ_API_KEY_2, GROQ_API_KEY_3,
+    GROQ_API_KEY_4, GROQ_API_KEY_5, GEMINI_API_KEY,
+    CEREBRAS_API_KEY, SAMBANOVA_API_KEY, MISTRAL_API_KEY)
 from characters import get_character, POKE_MESSAGES
 import database as db
 import random
 
-if GROQ_API_KEY:
-    client = AsyncOpenAI(api_key=GROQ_API_KEY, base_url="https://api.groq.com/openai/v1")
-    MODEL = "llama-3.3-70b-versatile"
-elif DEEPSEEK_API_KEY:
-    client = AsyncOpenAI(api_key=DEEPSEEK_API_KEY, base_url="https://api.deepseek.com")
-    MODEL = "deepseek-chat"
-elif GEMINI_API_KEY:
-    client = AsyncOpenAI(api_key=GEMINI_API_KEY, base_url="https://generativelanguage.googleapis.com/v1beta/openai/")
-    MODEL = "gemini-1.5-flash"
-else:
+GROQ_KEYS = [k for k in [GROQ_API_KEY, GROQ_API_KEY_2, GROQ_API_KEY_3, GROQ_API_KEY_4, GROQ_API_KEY_5] if k]
+
+# collect all available keys with their configs
+CLIENTS = []
+for key in GROQ_KEYS:
+    CLIENTS.append({"key": key, "base_url": "https://api.groq.com/openai/v1", "model": "llama-3.3-70b-versatile"})
+if CEREBRAS_API_KEY:
+    CLIENTS.append({"key": CEREBRAS_API_KEY, "base_url": "https://api.cerebras.ai/v1", "model": "llama3.1-70b"})
+if SAMBANOVA_API_KEY:
+    CLIENTS.append({"key": SAMBANOVA_API_KEY, "base_url": "https://api.sambanova.ai/v1", "model": "Meta-Llama-3.1-70B-Instruct"})
+if MISTRAL_API_KEY:
+    CLIENTS.append({"key": MISTRAL_API_KEY, "base_url": "https://api.mistral.ai/v1", "model": "mistral-small-latest"})
+if GEMINI_API_KEY:
+    CLIENTS.append({"key": GEMINI_API_KEY, "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/", "model": "gemini-2.0-flash"})
+if DEEPSEEK_API_KEY:
+    CLIENTS.append({"key": DEEPSEEK_API_KEY, "base_url": "https://api.deepseek.com", "model": "deepseek-chat"})
+
+if not CLIENTS:
     raise ValueError("No AI API key found.")
+
+current_index = 0
+
+
+def get_client():
+    global current_index
+    c = CLIENTS[current_index % len(CLIENTS)]
+    current_index += 1
+    return AsyncOpenAI(api_key=c["key"], base_url=c["base_url"]), c["model"]
 
 PHOTO_REQUEST_KEYWORDS = [
     "photo", "pic", "picture", "selfie", "send", "dikha", "dikhao",
@@ -60,13 +79,14 @@ async def get_ai_reply(user_id, character_slug, user_message):
     history = db.get_conversation_history(user_id, character_slug)
     messages = [{"role": "system", "content": system_prompt}] + history + [{"role": "user", "content": user_message}]
 
+    client, MODEL = get_client()
     response = await client.chat.completions.create(
         model=MODEL,
         messages=messages,
         temperature=1.0,
         max_tokens=100,
-        frequency_penalty=1.0,   # prevents word repetition
-        presence_penalty=0.6     # encourages new topics
+        frequency_penalty=1.0,
+        presence_penalty=0.6
     )
     reply = response.choices[0].message.content
     db.save_conversation(user_id, character_slug, user_message, reply)

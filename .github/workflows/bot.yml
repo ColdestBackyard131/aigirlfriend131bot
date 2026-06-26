@@ -3,8 +3,8 @@ name: Run Telegram Bot
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 * * * *'   # starts every hour at :00
-    - cron: '57 * * * *'  # starts every hour at :57 (3 min before :00 job dies)
+    - cron: '0 * * * *'   # Job A: starts at :00, runs 58 min, dies at :58
+    - cron: '55 * * * *'  # Job B: starts at :55, runs 58 min → overlaps Job A last 3 min
 
 jobs:
   run-bot:
@@ -26,6 +26,14 @@ jobs:
         env:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          GROQ_API_KEY_2: ${{ secrets.GROQ_API_KEY_2 }}
+          GROQ_API_KEY_3: ${{ secrets.GROQ_API_KEY_3 }}
+          GROQ_API_KEY_4: ${{ secrets.GROQ_API_KEY_4 }}
+          GROQ_API_KEY_5: ${{ secrets.GROQ_API_KEY_5 }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          CEREBRAS_API_KEY: ${{ secrets.CEREBRAS_API_KEY }}
+          SAMBANOVA_API_KEY: ${{ secrets.SAMBANOVA_API_KEY }}
+          MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
           STABLE_HORDE_API_KEY: ${{ secrets.STABLE_HORDE_API_KEY }}
           ADMIN_ID: ${{ secrets.ADMIN_ID }}
           TURSO_URL: ${{ secrets.TURSO_URL }}

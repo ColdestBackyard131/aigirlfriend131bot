@@ -165,13 +165,24 @@ async def handle_message(update: Update, context):
     # show typing indicator while AI is thinking
     await context.bot.send_chat_action(chat_id=user_id, action="typing")
 
-    try:
-        reply, is_photo_req = await ai_chat.get_ai_reply(user_id, active_char, update.message.text)
-        await update.message.reply_text(reply)
-    except Exception as e:
-        print(f"[ERROR] AI reply failed for user {user_id}: {e}")
-        await update.message.reply_text("Oops, kuch gadbad ho gayi 😅 thodi der baad try karo!")
+    # retry up to 3 times if API fails
+    reply = None
+    for attempt in range(3):
+        try:
+            reply, is_photo_req = await ai_chat.get_ai_reply(user_id, active_char, update.message.text)
+            break
+        except Exception as e:
+            print(f"[ERROR] Attempt {attempt+1} failed: {e}")
+            if attempt < 2:
+                await context.bot.send_chat_action(chat_id=user_id, action="typing")
+                import asyncio
+                await asyncio.sleep(2)
+
+    if not reply:
+        # silent retry failed — just ignore, don't show error to user
         return
+
+    await update.message.reply_text(reply)
 
     if is_photo_req:
         is_paid = user["tier"] != "free"
@@ -287,7 +298,7 @@ async def poke_inactive_users(context):
 
 def main():
     import threading, os, signal
-    # auto-exit after 55 min so the next queued workflow takes over with no gap
+    # auto-exit at 55 min so Job B (started at :55) takes over
     threading.Timer(55 * 60, lambda: os.kill(os.getpid(), signal.SIGTERM)).start()
 
     request = HTTPXRequest(connect_timeout=30, read_timeout=30)
