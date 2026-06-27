@@ -57,7 +57,8 @@ REFUSAL_PHRASES = [
     "i cannot", "i can't", "i am not able", "i'm not able",
     "as an ai", "i'm an ai", "i am an ai", "language model",
     "not appropriate", "explicit content", "i apologize",
-    "i'm here to help", "here to help"
+    "i'm here to help", "here to help", "won't engage",
+    "cannot engage", "i will not", "not able to", "against my"
 ]
 
 
