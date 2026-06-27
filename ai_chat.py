@@ -17,14 +17,14 @@ if MISTRAL_API_KEY:
 # Gemini third
 GEMINI_KEYS = [k for k in [GEMINI_API_KEY, GEMINI_API_KEY_2] if k]
 for key in GEMINI_KEYS:
-    CLIENTS.append({"key": key, "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/", "model": "gemini-2.0-flash"})
+    CLIENTS.append({"key": key, "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/", "model": "gemini-1.5-flash"})
 # SambaNova fourth
 if SAMBANOVA_API_KEY:
     CLIENTS.append({"key": SAMBANOVA_API_KEY, "base_url": "https://api.sambanova.ai/v1", "model": "Meta-Llama-3.1-70B-Instruct"})
 # Cerebras fifth
 CEREBRAS_KEYS = [k for k in [CEREBRAS_API_KEY, CEREBRAS_API_KEY_2, CEREBRAS_API_KEY_3] if k]
 for key in CEREBRAS_KEYS:
-    CLIENTS.append({"key": key, "base_url": "https://api.cerebras.ai/v1", "model": "llama-3.3-70b"})
+    CLIENTS.append({"key": key, "base_url": "https://api.cerebras.ai/v1", "model": "llama3.1-70b"})
 # Groq last — most restrictive
 GROQ_KEYS = [k for k in [GROQ_API_KEY, GROQ_API_KEY_2, GROQ_API_KEY_3, GROQ_API_KEY_4, GROQ_API_KEY_5] if k]
 for key in GROQ_KEYS:
