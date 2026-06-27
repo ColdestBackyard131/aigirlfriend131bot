@@ -7,24 +7,28 @@ from characters import get_character, POKE_MESSAGES
 import database as db
 import random
 
-GROQ_KEYS = [k for k in [GROQ_API_KEY, GROQ_API_KEY_2, GROQ_API_KEY_3, GROQ_API_KEY_4, GROQ_API_KEY_5] if k]
-
-# collect all available keys with their configs
 CLIENTS = []
-for key in GROQ_KEYS:
-    CLIENTS.append({"key": key, "base_url": "https://api.groq.com/openai/v1", "model": "llama-3.3-70b-versatile"})
-CEREBRAS_KEYS = [k for k in [CEREBRAS_API_KEY, CEREBRAS_API_KEY_2, CEREBRAS_API_KEY_3] if k]
-for key in CEREBRAS_KEYS:
-    CLIENTS.append({"key": key, "base_url": "https://api.cerebras.ai/v1", "model": "llama-3.3-70b"})
-if SAMBANOVA_API_KEY:
-    CLIENTS.append({"key": SAMBANOVA_API_KEY, "base_url": "https://api.sambanova.ai/v1", "model": "Meta-Llama-3.1-70B-Instruct"})
+# DeepSeek first — most permissive, best for adult roleplay
+if DEEPSEEK_API_KEY:
+    CLIENTS.append({"key": DEEPSEEK_API_KEY, "base_url": "https://api.deepseek.com", "model": "deepseek-chat"})
+# Mistral second — also permissive
 if MISTRAL_API_KEY:
     CLIENTS.append({"key": MISTRAL_API_KEY, "base_url": "https://api.mistral.ai/v1", "model": "mistral-small-latest"})
+# Gemini third
 GEMINI_KEYS = [k for k in [GEMINI_API_KEY, GEMINI_API_KEY_2] if k]
 for key in GEMINI_KEYS:
     CLIENTS.append({"key": key, "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/", "model": "gemini-2.0-flash"})
-if DEEPSEEK_API_KEY:
-    CLIENTS.append({"key": DEEPSEEK_API_KEY, "base_url": "https://api.deepseek.com", "model": "deepseek-chat"})
+# SambaNova fourth
+if SAMBANOVA_API_KEY:
+    CLIENTS.append({"key": SAMBANOVA_API_KEY, "base_url": "https://api.sambanova.ai/v1", "model": "Meta-Llama-3.1-70B-Instruct"})
+# Cerebras fifth
+CEREBRAS_KEYS = [k for k in [CEREBRAS_API_KEY, CEREBRAS_API_KEY_2, CEREBRAS_API_KEY_3] if k]
+for key in CEREBRAS_KEYS:
+    CLIENTS.append({"key": key, "base_url": "https://api.cerebras.ai/v1", "model": "llama-3.3-70b"})
+# Groq last — most restrictive
+GROQ_KEYS = [k for k in [GROQ_API_KEY, GROQ_API_KEY_2, GROQ_API_KEY_3, GROQ_API_KEY_4, GROQ_API_KEY_5] if k]
+for key in GROQ_KEYS:
+    CLIENTS.append({"key": key, "base_url": "https://api.groq.com/openai/v1", "model": "llama-3.3-70b-versatile"})
 
 if not CLIENTS:
     raise ValueError("No AI API key found.")
