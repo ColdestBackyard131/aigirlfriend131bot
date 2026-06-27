@@ -3,32 +3,57 @@ import asyncio
 import base64
 from config import STABLE_HORDE_API_KEY
 
+QUALITY_SUFFIX = (
+    ", ultra realistic, 4k, sharp focus, professional photography, "
+    "canon eos r5, 85mm lens, natural skin texture, highly detailed face, "
+    "cinematic lighting, instagram photo"
+)
+
+NEGATIVE = (
+    "cartoon, anime, illustration, painting, drawing, fake, cgi, 3d render, "
+    "blurry, low quality, watermark, text, ugly, deformed, bad anatomy"
+)
+
 
 async def _pollinations(prompt, nsfw=False):
-    # add realism boosters to every prompt
-    quality_suffix = ", photorealistic, 8k, shot on iphone 15, candid, natural lighting, highly detailed"
-    full_prompt = prompt + quality_suffix
+    full_prompt = prompt + QUALITY_SUFFIX
+    neg = NEGATIVE
     safe_prompt = full_prompt.replace(" ", "%20").replace(",", "%2C")
+    safe_neg = neg.replace(" ", "%20").replace(",", "%2C")
 
-    if nsfw:
-        url = f"https://image.pollinations.ai/prompt/{safe_prompt}?width=768&height=1024&nologo=true&enhance=true&model=flux"
-    else:
-        url = f"https://image.pollinations.ai/prompt/{safe_prompt}?width=768&height=1024&nologo=true&enhance=true&model=flux"
+    url = (
+        f"https://image.pollinations.ai/prompt/{safe_prompt}"
+        f"?negative={safe_neg}"
+        f"&width=832&height=1216"
+        f"&nologo=true&enhance=true&model=flux"
+        f"&seed={asyncio.get_event_loop().time().__int__()}"
+    )
 
     async with aiohttp.ClientSession() as session:
-        async with session.get(url, timeout=aiohttp.ClientTimeout(total=30)) as resp:
+        async with session.get(url, timeout=aiohttp.ClientTimeout(total=60)) as resp:
             if resp.status == 200:
-                return await resp.read()
-    raise Exception("Pollinations failed")
+                data = await resp.read()
+                if len(data) > 10000:  # make sure it's a real image not an error page
+                    return data
+    raise Exception("Pollinations failed or returned invalid image")
 
 
 async def _stable_horde(prompt, nsfw=False):
     url = "https://stablehorde.net/api/v2/generate/async"
     payload = {
-        "prompt": prompt,
+        "prompt": prompt + QUALITY_SUFFIX,
         "nsfw": nsfw,
-        "models": ["SDXL 1.0"],
-        "params": {"steps": 20}
+        "censor_nsfw": not nsfw,
+        "models": ["Realistic Vision"],
+        "params": {
+            "steps": 30,
+            "cfg_scale": 7,
+            "width": 832,
+            "height": 1216,
+            "negative_prompt": NEGATIVE,
+            "karras": True,
+            "sampler_name": "k_dpmpp_2m"
+        }
     }
     headers = {"apikey": STABLE_HORDE_API_KEY, "Content-Type": "application/json"}
 
@@ -37,9 +62,11 @@ async def _stable_horde(prompt, nsfw=False):
             data = await resp.json()
             job_id = data["id"]
 
-        for _ in range(150):  # max 5 min
+        for _ in range(150):
             await asyncio.sleep(2)
-            async with session.get(f"https://stablehorde.net/api/v2/generate/status/{job_id}") as resp:
+            async with session.get(
+                f"https://stablehorde.net/api/v2/generate/status/{job_id}"
+            ) as resp:
                 status = await resp.json()
                 if status.get("done"):
                     img_b64 = status["generations"][0]["img"]
@@ -49,13 +76,10 @@ async def _stable_horde(prompt, nsfw=False):
 
 
 async def generate_image(prompt, nsfw=False):
-    # try Pollinations first (fast, instant)
     try:
         return await _pollinations(prompt, nsfw)
     except:
         pass
-
-    # fallback to Stable Horde
     try:
         return await _stable_horde(prompt, nsfw)
     except:

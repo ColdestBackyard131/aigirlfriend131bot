@@ -27,50 +27,50 @@ from utils import age_gate, age_confirm_callback
 PHOTO_PROMPTS = {
     "kriti": {
         "sfw": [
-            "realistic selfie photo of beautiful indian girl 23 years old, casual outfit, natural lighting, shot on iphone, candid",
-            "indian girl taking mirror selfie, kurta, natural makeup, bedroom background, realistic photo",
-            "pretty indian girl selfie in cafe, smiling, natural light, realistic",
+            "beautiful indian woman 23 years old, long black hair, kurta, smiling, selfie, mumbai cafe background, sharp face, real skin texture",
+            "pretty indian girl casual outfit, dupatta, natural makeup, outdoor golden hour selfie, 4k sharp",
+            "indian girl mirror selfie, ethnic wear, bedroom, warm lighting, highly detailed face",
         ],
         "bikini": [
-            "realistic selfie photo of beautiful indian girl in bikini at beach, natural lighting, candid shot, iphone photo",
-            "indian girl pool selfie in swimsuit, sun kissed skin, realistic photo, natural",
+            "beautiful indian woman in red bikini, beach goa, wet hair, sun kissed skin, candid 4k photo",
+            "sexy indian girl in swimsuit by pool, confident pose, golden hour, sharp detailed",
         ],
         "lingerie": [
-            "realistic boudoir selfie indian girl in lingerie, bedroom, soft lighting, mirror selfie, natural",
-            "beautiful indian girl lingerie selfie, dim bedroom lighting, realistic candid photo",
+            "beautiful indian woman in black lingerie, bedroom, soft lamp light, seductive look, boudoir 4k",
+            "sexy indian girl in lace lingerie, mirror selfie, dim warm lighting, highly detailed",
         ],
         "nude": [
-            "realistic artistic nude selfie beautiful indian girl, soft natural lighting, tasteful, high quality",
+            "beautiful indian woman nude, artistic boudoir, soft natural window light, tasteful, 4k high quality, detailed skin",
         ]
     },
     "naina": {
         "sfw": [
-            "delhi college girl selfie, casual jeans top, natural makeup, outdoor lighting, realistic iphone photo",
-            "pretty indian girl mirror selfie, college campus, realistic candid",
+            "pretty delhi college girl, jeans and crop top, university campus, candid photo, natural light, sharp 4k",
+            "indian girl casual selfie, coffee shop, smiling, no makeup look, highly detailed face, realistic",
         ],
         "bikini": [
-            "realistic indian college girl bikini selfie at pool, natural lighting, candid iphone shot",
+            "beautiful indian college girl in bikini, poolside, delhi summer, candid shot, sharp detailed 4k",
         ],
         "lingerie": [
-            "realistic indian girl lingerie mirror selfie, bedroom, warm lighting, natural candid",
+            "pretty indian girl in pink lingerie, bedroom, selfie, realistic 4k, detailed skin texture",
         ],
         "nude": [
-            "realistic artistic nude photo beautiful indian girl natural lighting tasteful high quality",
+            "beautiful indian girl nude artistic photo, soft lighting, tasteful boudoir, 4k sharp detailed",
         ]
     },
     "sara": {
         "sfw": [
-            "confident beautiful indian girl selfie, stylish outfit, natural lighting, realistic iphone photo",
-            "indian girl mirror selfie, gym outfit, natural makeup, realistic candid",
+            "confident beautiful indian woman 25, stylish western outfit, city background, power pose, sharp 4k",
+            "sexy indian girl gym outfit, sports bra, leggings, gym selfie, toned body, highly detailed",
         ],
         "bikini": [
-            "sexy indian girl bikini beach selfie, golden hour lighting, realistic candid iphone photo",
+            "dominant confident indian woman in black bikini, luxury pool, bold pose, 4k sharp photo",
         ],
         "lingerie": [
-            "dominant confident indian girl black lingerie selfie, dim bedroom lighting, realistic photo",
+            "confident indian woman in black lace lingerie, luxury bedroom, bold seductive look, 4k detailed",
         ],
         "nude": [
-            "realistic artistic nude photo confident indian girl natural lighting high quality tasteful",
+            "confident beautiful indian woman nude, artistic luxury boudoir, dramatic lighting, 4k sharp",
         ]
     }
 }
@@ -327,10 +327,6 @@ async def poke_inactive_users(context):
 
 
 def main():
-    import threading, os, signal
-    # auto-exit at 55 min so Job B (started at :55) takes over
-    threading.Timer(55 * 60, lambda: os.kill(os.getpid(), signal.SIGTERM)).start()
-
     request = HTTPXRequest(connect_timeout=30, read_timeout=30)
     app = Application.builder().token(TELEGRAM_TOKEN).request(request).build()
 
