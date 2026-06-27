@@ -1,58 +1,70 @@
 import aiohttp
 import asyncio
 import base64
+import random
 from config import STABLE_HORDE_API_KEY
 
 QUALITY_SUFFIX = (
-    ", ultra realistic, 4k, sharp focus, professional photography, "
-    "canon eos r5, 85mm lens, natural skin texture, highly detailed face, "
-    "cinematic lighting, instagram photo"
+    ", real human, photorealistic, hyperrealistic, 8k uhd, shot on sony a7r5, "
+    "85mm f1.4 lens, natural skin pores, real skin texture, subsurface scattering, "
+    "sharp eyes, detailed face, cinematic color grading, instagram model photo, "
+    "professional photography, perfect lighting"
 )
 
 NEGATIVE = (
-    "cartoon, anime, illustration, painting, drawing, fake, cgi, 3d render, "
-    "blurry, low quality, watermark, text, ugly, deformed, bad anatomy"
+    "cartoon, anime, illustration, painting, cgi, 3d render, digital art, "
+    "blurry, low quality, watermark, text, logo, ugly, deformed, mutated, "
+    "bad anatomy, bad hands, extra fingers, disfigured, plastic skin, "
+    "fake looking, unrealistic, airbrushed, overexposed, underexposed, "
+    "duplicate, clone, multiple people"
 )
 
 
+def _unique_seed():
+    return random.randint(100000, 999999999)
+
+
 async def _pollinations(prompt, nsfw=False):
+    seed = _unique_seed()
     full_prompt = prompt + QUALITY_SUFFIX
-    neg = NEGATIVE
-    safe_prompt = full_prompt.replace(" ", "%20").replace(",", "%2C")
-    safe_neg = neg.replace(" ", "%20").replace(",", "%2C")
+    safe_prompt = full_prompt.replace(" ", "%20").replace(",", "%2C").replace("(", "%28").replace(")", "%29")
+    safe_neg = NEGATIVE.replace(" ", "%20").replace(",", "%2C")
 
     url = (
         f"https://image.pollinations.ai/prompt/{safe_prompt}"
         f"?negative={safe_neg}"
         f"&width=832&height=1216"
         f"&nologo=true&enhance=true&model=flux"
-        f"&seed={asyncio.get_event_loop().time().__int__()}"
+        f"&seed={seed}"
+        f"&safe={'false' if nsfw else 'true'}"
     )
 
     async with aiohttp.ClientSession() as session:
-        async with session.get(url, timeout=aiohttp.ClientTimeout(total=60)) as resp:
+        async with session.get(url, timeout=aiohttp.ClientTimeout(total=90)) as resp:
             if resp.status == 200:
                 data = await resp.read()
-                if len(data) > 10000:  # make sure it's a real image not an error page
+                if len(data) > 15000:
                     return data
-    raise Exception("Pollinations failed or returned invalid image")
+    raise Exception("Pollinations failed")
 
 
 async def _stable_horde(prompt, nsfw=False):
+    seed = _unique_seed()
     url = "https://stablehorde.net/api/v2/generate/async"
     payload = {
-        "prompt": prompt + QUALITY_SUFFIX,
+        "prompt": prompt + QUALITY_SUFFIX + f" ### {NEGATIVE}",
         "nsfw": nsfw,
         "censor_nsfw": not nsfw,
         "models": ["Realistic Vision"],
         "params": {
-            "steps": 30,
-            "cfg_scale": 7,
+            "steps": 35,
+            "cfg_scale": 7.5,
             "width": 832,
             "height": 1216,
-            "negative_prompt": NEGATIVE,
+            "seed": str(seed),
             "karras": True,
-            "sampler_name": "k_dpmpp_2m"
+            "sampler_name": "k_dpmpp_2m",
+            "hires_fix": True,
         }
     }
     headers = {"apikey": STABLE_HORDE_API_KEY, "Content-Type": "application/json"}

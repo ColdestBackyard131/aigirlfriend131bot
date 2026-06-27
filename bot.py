@@ -23,54 +23,103 @@ import image_gen
 from payments import subscribe_command, buy_callback, pre_checkout, successful_payment, SUBSCRIPTION_TEXT
 from utils import age_gate, age_confirm_callback
 
-# photo prompts per character
+# photo prompts per character — progressive reveal system
 PHOTO_PROMPTS = {
     "kriti": {
         "sfw": [
-            "beautiful indian woman 23 years old, long black hair, kurta, smiling, selfie, mumbai cafe background, sharp face, real skin texture",
-            "pretty indian girl casual outfit, dupatta, natural makeup, outdoor golden hour selfie, 4k sharp",
-            "indian girl mirror selfie, ethnic wear, bedroom, warm lighting, highly detailed face",
+            "beautiful indian woman 23, wearing elegant silk saree, blouse, bindi, long black hair, smiling softly, mumbai apartment balcony, golden hour light",
+            "pretty indian girl in salwar kameez, dupatta draped, natural makeup, standing near window, soft sunlight, candid home photo",
+            "indian girl in stylish kurti and jeans, hair open, laughing candid, coffee shop background, warm lighting",
+            "beautiful indian woman in western crop top and high waist jeans, mall background, confident pose, natural face",
+            "indian girl in floral sundress, outdoor park, hair blowing in wind, natural smile, golden hour",
+            "pretty indian girl in lehenga choli, traditional jewellery, living room, diwali lights background, festive look",
+            "indian woman in office formal blazer and trousers, professional but pretty, natural makeup, confident",
+            "indian girl in cozy oversized hoodie and shorts, bedroom, messy hair, cute morning look, warm light",
+        ],
+        "teasing": [
+            "beautiful indian woman in saree with pallu slightly slipping off shoulder, bedroom, seductive soft smile, warm lamp light",
+            "indian girl in deep neck kurti, sitting on bed, hair open, slight cleavage, natural seductive look, dim warm light",
+            "pretty indian woman in crop top sitting on floor, midriff showing, candid home photo, natural light",
+            "indian girl in spaghetti strap top and shorts, standing near window, wind blowing hair, natural skin, real photo",
+            "beautiful indian woman in off shoulder top, slight cleavage, mirror selfie, natural makeup, warm bedroom light",
+            "indian girl in tight jeans and fitted top, lying on bed reading phone, candid real photo, natural lighting",
         ],
         "bikini": [
-            "beautiful indian woman in red bikini, beach goa, wet hair, sun kissed skin, candid 4k photo",
-            "sexy indian girl in swimsuit by pool, confident pose, golden hour, sharp detailed",
+            "beautiful indian woman in red bikini, goa beach, wet hair, sun kissed brown skin, waves behind, real candid photo",
+            "sexy indian girl in black bikini by hotel pool, confident pose, golden hour, water droplets on skin",
+            "indian woman in yellow two piece swimsuit, beach selfie, natural smile, real skin, sunny day",
+            "beautiful indian girl in floral bikini, lying on beach towel, reading, candid real photo, tanned skin",
         ],
         "lingerie": [
-            "beautiful indian woman in black lingerie, bedroom, soft lamp light, seductive look, boudoir 4k",
-            "sexy indian girl in lace lingerie, mirror selfie, dim warm lighting, highly detailed",
+            "beautiful indian woman in black lace bra and panty, sitting on bed edge, looking at camera softly, warm lamp bedroom",
+            "sexy indian girl in red lingerie set, mirror selfie, dim bedroom, real skin texture, seductive look",
+            "indian woman in white lace lingerie, lying on white bedsheet, soft morning light, natural real photo",
+            "pretty indian girl in pink lingerie, standing near window, curtain blowing, natural light, real skin",
+            "indian girl just removed top wearing only bra, holding shirt in hand, surprised candid look, bedroom",
+            "beautiful indian woman pressing her own boobs in black bra, seductive expression, bedroom mirror selfie",
         ],
         "nude": [
-            "beautiful indian woman nude, artistic boudoir, soft natural window light, tasteful, 4k high quality, detailed skin",
+            "beautiful indian woman topless, hands covering chest, shy seductive smile, soft bedroom lighting, real skin",
+            "sexy indian girl fully nude lying on bed, legs crossed, real skin texture, soft lamp light, tasteful artistic",
+            "beautiful indian woman nude in shower, water running, eyes closed, steam, real skin, artistic photo",
+            "indian girl nude selfie in mirror, wet hair, post shower, bathroom, natural real skin, soft light",
+            "beautiful indian woman nude, sitting on bed sending flying kiss to camera, playful seductive look",
+            "sexy indian girl nude, lying sideways on bed, hair spread, real skin pores, cinematic soft light",
         ]
     },
     "naina": {
         "sfw": [
-            "pretty delhi college girl, jeans and crop top, university campus, candid photo, natural light, sharp 4k",
-            "indian girl casual selfie, coffee shop, smiling, no makeup look, highly detailed face, realistic",
+            "pretty delhi college girl in jeans and crop top, university campus, candid photo, natural light",
+            "indian college girl in casual kurti, canteen background, laughing with phone, real candid photo",
+            "cute indian girl in hoodie and joggers, college corridor, morning look, natural face, real photo",
+            "delhi girl in stylish co-ord set, mall background, shopping bags, confident smile, real photo",
+            "indian college girl in saree for college fest, traditional makeup, excited smile, real candid",
+        ],
+        "teasing": [
+            "delhi college girl in tight crop top and low waist jeans, sitting on college wall, midriff showing, candid",
+            "indian girl in fitted tank top, bedroom, hair open, natural seductive look, warm afternoon light",
+            "pretty indian girl in short shorts and spaghetti top, home, lying on couch, real candid photo",
         ],
         "bikini": [
-            "beautiful indian college girl in bikini, poolside, delhi summer, candid shot, sharp detailed 4k",
+            "pretty delhi college girl in bikini, goa trip, beach, natural body, real candid photo, friends trip vibe",
+            "indian college girl in swimsuit by hostel pool, selfie, natural smile, real skin, sunny",
         ],
         "lingerie": [
-            "pretty indian girl in pink lingerie, bedroom, selfie, realistic 4k, detailed skin texture",
+            "pretty indian college girl in pink lingerie, hostel room, mirror selfie, real skin, seductive smile",
+            "delhi girl in black bra and panty, sitting on study table, playful look, warm room light",
+            "indian girl in lace lingerie, lying on bed, phone in hand, candid bedroom photo, real skin",
         ],
         "nude": [
-            "beautiful indian girl nude artistic photo, soft lighting, tasteful boudoir, 4k sharp detailed",
+            "pretty indian college girl topless, hands covering chest coyly, real skin, soft bedroom light, shy smile",
+            "delhi girl fully nude, sitting on bed, knees up, hair messy, real skin texture, soft warm light",
+            "indian girl nude selfie in hostel bathroom mirror, post shower, wet body, natural real skin",
         ]
     },
     "sara": {
         "sfw": [
-            "confident beautiful indian woman 25, stylish western outfit, city background, power pose, sharp 4k",
-            "sexy indian girl gym outfit, sports bra, leggings, gym selfie, toned body, highly detailed",
+            "confident beautiful indian woman 25 in power blazer and trousers, office background, bold pose, real photo",
+            "sexy indian girl in gym outfit, sports bra and leggings, gym mirror selfie, toned body, real photo",
+            "confident indian woman in western bodycon dress, restaurant background, wine glass, classy real photo",
+            "sara in casual jeans and fitted tshirt, home terrace, golden hour, hair open, real candid photo",
+        ],
+        "teasing": [
+            "confident indian woman in deep neck bodycon dress, slight cleavage, party background, bold seductive look",
+            "indian girl in sports bra only working out, toned midriff, gym, real sweaty candid photo",
+            "dominant indian woman in silk robe slightly open, bedroom, bold eye contact, real photo",
         ],
         "bikini": [
-            "dominant confident indian woman in black bikini, luxury pool, bold pose, 4k sharp photo",
+            "dominant confident indian woman in black bikini, luxury hotel pool, bold pose, real photo",
+            "sara in red bikini, beach, bold confident pose, sun kissed skin, real candid photo",
         ],
         "lingerie": [
-            "confident indian woman in black lace lingerie, luxury bedroom, bold seductive look, 4k detailed",
+            "confident indian woman in black lace lingerie, luxury bedroom, dominant seductive look, real photo",
+            "sara in red lingerie set, bold mirror selfie, confident expression, real skin, warm light",
+            "dominant indian girl pressing her boobs in black bra, bold seductive expression, luxury bedroom",
         ],
         "nude": [
-            "confident beautiful indian woman nude, artistic luxury boudoir, dramatic lighting, 4k sharp",
+            "confident beautiful indian woman topless, bold direct eye contact, luxury bedroom, real skin, artistic",
+            "sara fully nude, dominant bold pose on bed, real skin texture, cinematic dramatic lighting",
+            "indian woman nude in shower, bold confident expression, water running, steam, real skin, artistic",
         ]
     }
 }
@@ -88,37 +137,75 @@ NIGHT_CAPTIONS = [
 ]
 
 
-async def send_photo_to_user(bot, user_id, active_char, user, caption):
+# track how many photos each user has received for progressive reveal
+user_photo_count = {}
+
+
+def _get_photo_category(user_id, user, explicit_requested=False):
     is_paid = user["tier"] != "free"
     nsfw = is_paid and int(user.get("nsfw_allowed", 0)) == 1
+    count = user_photo_count.get(user_id, 0)
+
+    if not is_paid:
+        return "sfw"
+    if not nsfw:
+        return random.choice(["sfw", "sfw", "teasing"])  # mostly sfw with rare tease
+
+    # paid + nsfw: progressive reveal based on photo count
+    if explicit_requested:
+        if count < 2:
+            return "teasing"       # first 2 explicit requests: still teasing
+        elif count < 4:
+            return "bikini"        # then bikini
+        elif count < 6:
+            return "lingerie"      # then lingerie
+        else:
+            return "nude"          # only after 6 photos: full explicit
+    else:
+        if count < 3:
+            return "sfw"           # first 3 auto photos: fully clothed
+        elif count < 5:
+            return "teasing"       # then teasing
+        else:
+            return random.choice(["bikini", "lingerie"])  # then spicy
+
+
+async def send_photo_to_user(bot, user_id, active_char, user, caption):
+    category = _get_photo_category(user_id, user, explicit_requested=False)
     prompts = PHOTO_PROMPTS.get(active_char, PHOTO_PROMPTS["kriti"])
-    category = random.choice(["bikini", "lingerie"]) if nsfw else "sfw"
+    if category not in prompts:
+        category = "sfw"
     prompt = random.choice(prompts[category])
     try:
-        img_bytes = await image_gen.generate_image(prompt, nsfw=nsfw)
+        img_bytes = await image_gen.generate_image(prompt, nsfw=(category in ["lingerie", "nude"]))
         await bot.send_photo(chat_id=user_id, photo=img_bytes, caption=caption)
+        user_photo_count[user_id] = user_photo_count.get(user_id, 0) + 1
     except:
         pass
 
 
 async def send_photo_on_request(update, user_id, active_char, user):
     is_paid = user["tier"] != "free"
-    nsfw = is_paid and int(user.get("nsfw_allowed", 0)) == 1
     if not is_paid:
-        return  # free users don't get photos on demand
+        return
+    category = _get_photo_category(user_id, user, explicit_requested=True)
     prompts = PHOTO_PROMPTS.get(active_char, PHOTO_PROMPTS["kriti"])
-    category = random.choice(["bikini", "lingerie", "nude"]) if nsfw else "bikini"
+    if category not in prompts:
+        category = "sfw"
     prompt = random.choice(prompts[category])
     captions = [
         "sirf tumhare liye 💋",
         "lo jaan 😈",
         "kaisa laga? 😏",
         "iske baad kuch bolna hai? 🔥",
-        "abhi khush? 😘"
+        "abhi khush? 😘",
+        "ye toh bas jhalak hai 🙈",
+        "aur chahiye? 😉",
     ]
     try:
-        img_bytes = await image_gen.generate_image(prompt, nsfw=nsfw)
+        img_bytes = await image_gen.generate_image(prompt, nsfw=(category in ["lingerie", "nude"]))
         await update.message.reply_photo(photo=img_bytes, caption=random.choice(captions))
+        user_photo_count[user_id] = user_photo_count.get(user_id, 0) + 1
     except:
         pass
 
